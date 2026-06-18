@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NTE 自己紹介カードジェネレーター</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            background-color: #0d0f12; color: #e2e8f0;
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+            margin: 0; padding: 20px 10px; display: flex; flex-direction: column; align-items: center;
+        }
+        .container { max-width: 600px; width: 100%; display: flex; flex-direction: column; gap: 20px; }
+        .form-side, .preview-side {
+            background: #161920; padding: 20px; border-radius: 12px; border: 1px solid #2a2f3d; width: 100%;
+        }
+        h2 {
+            margin-top: 0; color: #00ffcc; text-transform: uppercase; letter-spacing: 2px; font-size: 1.1rem;
+            border-bottom: 2px solid #00ffcc; padding-bottom: 8px; margin-bottom: 15px;
+        }
+        .input-group { margin-bottom: 12px; }
+        label { display: block; margin-bottom: 4px; font-size: 0.8rem; color: #94a3b8; }
+        input, textarea {
+            width: 100%; padding: 10px; background: #222733; border: 1px solid #3b4252;
+            border-radius: 6px; color: white; font-size: 0.95rem;
+        }
+        input:focus, textarea:focus { outline: none; border-color: #00ffcc; box-shadow: 0 0 5px rgba(0, 255, 204, 0.4); }
+        .save-btn {
+            display: block; width: 100%; padding: 14px; background: linear-gradient(135deg, #00ffcc 0%, #00cccc 100%);
+            color: #0d0f12; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold;
+            cursor: pointer; margin-top: 15px; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .card-container {
+            width: 100%; overflow: hidden; display: flex; justify-content: center; align-items: flex-start;
+            background: #090b0e; border-radius: 8px; padding: 10px;
+        }
+        .card {
+            width: 800px; height: 450px; background: linear-gradient(135deg, #11141a 0%, #1a1f2c 100%);
+            border: 4px solid #00ffcc; border-radius: 16px; padding: 35px;
+            position: relative; display: flex; flex-direction: column; flex-shrink: 0;
+        }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid rgba(0, 255, 204, 0.4); padding-bottom: 15px; margin-bottom: 20px; }
+        .card-item-label { font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+        .card-title { font-size: 2.2rem; font-weight: bold; color: #ffffff; text-shadow: 0 0 10px rgba(255,255,255,0.4); margin: 5px 0 0 0; }
+        .card-uid { font-size: 1.1rem; color: #00ffcc; font-family: monospace; background: rgba(0,0,0,0.3); padding: 5px 12px; border-radius: 4px; }
+        .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .card-item { background: rgba(255, 255, 255, 0.04); padding: 12px 18px; border-left: 4px solid #ff007f; border-radius: 0 8px 8px 0; }
+        .card-item-value { font-size: 1.3rem; font-weight: bold; margin-top: 4px; color: #ffffff; }
+        .card-footer { margin-top: auto; font-size: 1.05rem; color: #cbd5e1; background: rgba(0, 0, 0, 0.3); padding: 12px; border-radius: 8px; min-height: 75px; line-height: 1.5; border: 1px solid rgba(255,255,255,0.1); }
+        
+        /* スマホ保存用モーダル */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; padding: 20px;
+        }
+        .modal-content { max-width: 100%; max-height: 70%; border: 2px solid #00ffcc; border-radius: 8px; box-shadow: 0 0 20px rgba(0, 255, 204, 0.5); }
+        .modal-hint { color: #00ffcc; margin-top: 15px; font-size: 1rem; font-weight: bold; text-align: center; animation: pulse 1.5s infinite; }
+        .close-btn { margin-top: 20px; padding: 10px 25px; background: #2a2f3d; color: white; border: 1px solid #3b4252; border-radius: 6px; cursor: pointer; }
+        @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="form-side">
+        <h2>Profile Input</h2>
+        <div class="input-group"><label>プレイヤー名</label><input type="text" id="inName" value="エージェント" oninput="updateCard()"></div>
+        <div class="input-group"><label>UID</label><input type="text" id="inUid" value="000000000" oninput="updateCard()"></div>
+        <div class="input-group"><label>エーテルレベル / ランク</label><input type="text" id="inRank" value="Lv.15" oninput="updateCard()"></div>
+        <div class="input-group"><label>推しキャラ / メインキャラ</label><input type="text" id="inChar" value="ミント" oninput="updateCard()"></div>
+        <div class="input-group"><label>プレイスタイル</label><input type="text" id="inStyle" value="まったり街ぶら・写真撮影・マルチ歓迎" oninput="updateCard()"></div>
+        <div class="input-group"><label>一言メッセージ (改行可)</label><textarea id="inMsg" rows="3" oninput="updateCard()">異能都市でのんびり過ごしています。気軽にフレンド申請どうぞ！</textarea></div>
+        <button class="save-btn" onclick="generateCardImage()">カード画像を生成する</button>
+    </div>
+    <div class="preview-side">
+        <h2>Card Preview</h2>
+        <div class="card-container" id="cardContainer">
+            <div class="card" id="cardPreview">
+                <div class="card-header">
+                    <div class="card-title-group"><div class="card-item-label">PROFILER</div><div class="card-title" id="outName">エージェント</div></div>
+                    <div class="card-uid">UID: <span id="outUid">000000000</span></div>
+                </div>
+                <div class="card-grid">
+                    <div class="card-item"><div class="card-item-label">Level / Rank</div><div class="card-item-value" id="outRank">Lv.15</div></div>
+                    <div class="card-item" style="border-left-color: #00ffcc;"><div class="card-item-label">Favorite Character</div><div class="card-item-value" id="outChar">ミント</div></div>
+                </div>
+                <div class="card-item" style="border-left-color: #3b4252;"><div class="card-item-label">Play Style</div><div class="card-item-value" id="outStyle" style="font-size: 1.15rem;">まったり街ぶら・写真撮影・マルチ歓迎</div></div>
+                <div class="card-footer" id="outMsg">異能都市でのんびり過ごしています。<br>気軽にフレンド申請どうぞ！</div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="resultModal">
+    <img src="" alt="Generated Card" class="modal-content" id="modalImage">
+    <div class="modal-hint">▲ 画像を長押しして保存してください ▲</div>
+    <button class="close-btn" onclick="closeModal()">閉じて直す</button>
+</div>
+<script>
+    function updateCard() {
+        document.getElementById('outName').innerText = document.getElementById('inName').value || ' ';
+        document.getElementById('outUid').innerText = document.getElementById('inUid').value || ' ';
+        document.getElementById('outRank').innerText = document.getElementById('inRank').value || ' ';
+        document.getElementById('outChar').innerText = document.getElementById('inChar').value || ' ';
+        document.getElementById('outStyle').innerText = document.getElementById('inStyle').value || ' ';
+        document.getElementById('outMsg').innerHTML = document.getElementById('inMsg').value.replace(/\n/g, '<br>') || ' ';
+    }
+    function scalePreview() {
+        const container = document.getElementById('cardContainer'); const preview = document.getElementById('cardPreview');
+        const containerWidth = container.clientWidth; const cardWidth = 800;
+        if (containerWidth < cardWidth) {
+            const scale = containerWidth / cardWidth; preview.style.transform = `scale(${scale})`;
+            preview.style.transformOrigin = 'top left'; container.style.height = `${450 * scale + 20}px`;
+        } else { preview.style.transform = 'none'; container.style.height = 'auto'; }
+    }
+    function generateCardImage() {
+        const card = document.getElementById('cardPreview'); const btn = document.querySelector('.save-btn');
+        btn.innerText = "生成中..."; btn.disabled = true;
+        const originalTransform = card.style.transform; const originalTransformOrigin = card.style.transformOrigin;
+        card.style.transform = 'none'; card.style.transformOrigin = 'initial';
+        html2canvas(card, { scale: 2, backgroundColor: null, useCORS: true, logging: false, width: 800, height: 450 }).then(canvas => {
+            card.style.transform = originalTransform; card.style.transformOrigin = originalTransformOrigin;
+            document.getElementById('modalImage').src = canvas.toDataURL("image/png");
+            document.getElementById('resultModal').style.display = 'flex';
+            btn.innerText = "カード画像を生成する"; btn.disabled = false;
+        }).catch(err => {
+            card.style.transform = originalTransform; card.style.transformOrigin = originalTransformOrigin;
+            alert("画像の生成に失敗しました。"); btn.innerText = "カード画像を生成する"; btn.disabled = false;
+        });
+    }
+    function closeModal() { document.getElementById('resultModal').style.display = 'none'; }
+    window.onload = () => { updateCard(); scalePreview(); }; window.onresize = scalePreview;
+</script>
+</body>
+</html>
