@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -8,59 +9,86 @@
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         
-        /* CSS変数でテーマカラーを管理 */
         :root {
             --theme-color: #ff66cc;
         }
 
         body {
-            background-color: #0d0f12; color: #e2e8f0;
+            background-color: #0d0f12; 
+            color: #e2e8f0;
             font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
-            margin: 0; padding: 20px 10px; display: flex; flex-direction: column; align-items: center;
+            margin: 0; 
+            padding: 20px 10px;
         }
-        .container { max-width: 600px; width: 100%; display: flex; flex-direction: column; gap: 20px; }
+        
+        /* 真っ白・真っ暗にならないように安全なレイアウトに変更 */
+        .container { 
+            max-width: 600px; 
+            width: 100%; 
+            margin: 0 auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 20px; 
+        }
+
         .form-side, .preview-side {
-            background: rgba(22, 25, 32, 0.9); padding: 20px; border-radius: 12px; border: 1px solid #2a2f3d; width: 100%;
+            background: rgba(22, 25, 32, 0.9); 
+            padding: 20px; 
+            border-radius: 12px; 
+            border: 1px solid #2a2f3d; 
+            width: 100%;
         }
+
         h2 {
-            margin-top: 0; color: var(--theme-color); text-transform: uppercase; letter-spacing: 2px; font-size: 1.1rem;
-            border-bottom: 2px solid var(--theme-color); padding-bottom: 8px; margin-bottom: 15px;
+            margin-top: 0; 
+            color: var(--theme-color); 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            font-size: 1.1rem;
+            border-bottom: 2px solid var(--theme-color); 
+            padding-bottom: 8px; 
+            margin-bottom: 15px;
             transition: color 0.2s, border-color 0.2s;
         }
+
         .input-group { margin-bottom: 12px; }
+        
         label { display: block; margin-bottom: 4px; font-size: 0.8rem; color: #cbd5e1; }
-        input, textarea, select {
+        
+        input[type="text"], textarea, select {
             width: 100%; padding: 10px; background: #222733; border: 1px solid #3b4252;
             border-radius: 6px; color: white; font-size: 0.95rem;
         }
+        
         input:focus, textarea:focus, select:focus { 
             outline: none; 
             border-color: var(--theme-color); 
             box-shadow: 0 0 5px var(--theme-color); 
         }
+        
         select option { background: #161920; color: white; }
         
-        /* カラーピッカー専用のスタイル調整 */
+        /* カラーピッカー */
         input[type="color"] {
-            padding: 2px; height: 40px; cursor: pointer; background: #222733;
+            width: 100%; padding: 2px; height: 45px; cursor: pointer; background: #222733;
+            border: 1px solid #3b4252; border-radius: 6px;
         }
         
         .save-btn {
-            display: block; width: 100%; padding: 14px; 
+            display: block; width: 100%; padding: 15px; 
             background: var(--theme-color);
             color: #ffffff; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold;
-            cursor: pointer; margin-top: 15px; text-transform: uppercase; letter-spacing: 1px;
+            cursor: pointer; margin-top: 20px; text-transform: uppercase; letter-spacing: 1px;
             text-shadow: 0 1px 2px rgba(0,0,0,0.6);
             transition: background 0.2s;
         }
-        .save-btn:active { opacity: 0.8; }
         
         .card-container {
             width: 100%; overflow: hidden; display: flex; justify-content: center; align-items: flex-start;
             background: #090b0e; border-radius: 8px; padding: 10px;
         }
         
-        /* カード全体のレイアウト（画像通りの完璧な配置） */
+        /* カード全体のレイアウト */
         .card {
             width: 800px; height: 450px; 
             background-image: url('19e93e6dae796-screenshotUrl.jpg');
@@ -69,11 +97,11 @@
             position: relative; display: flex; flex-direction: column; flex-shrink: 0;
             overflow: hidden;
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-            justify-content: start;
+            justify-content: flex-start;
             transition: border-color 0.2s;
         }
         
-        /* 読みやすさを確保する半透明オーバーレイ */
+        /* 半透明オーバーレイ */
         .card::before {
             content: '';
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -85,28 +113,27 @@
             position: relative; z-index: 2;
         }
 
-        /* 最上段：IDとUIDを中央揃え */
+        /* ヘッダー */
         .card-header { 
             display: flex; flex-direction: column; align-items: center; 
             padding-bottom: 10px; margin-bottom: 15px; text-align: center;
         }
         .card-item-label { font-size: 0.8rem; color: #cbd5e1; text-transform: uppercase; letter-spacing: 1px; }
-        .card-title { font-size: 2.6rem; font-weight: bold; color: #ffffff; text-shadow: 0 0 10px rgba(255,255,255,0.4); margin: 0; }
+        .card-title { font-size: 2.6rem; font-weight: bold; color: #ffffff; text-shadow: 0 0 10px rgba(255,255,255,0.4); margin: 0; line-height: 1.2; }
         
-        /* UIDボックス（枠線と背景をテーマカラーに連動。背景はJSで透明度30%を付与） */
+        /* UIDボックス */
         .card-uid { 
             font-size: 1.1rem; color: #ffffff; font-family: monospace; 
-            background: rgba(255, 102, 204, 0.3); 
+            background-color: rgba(255, 102, 204, 0.3); 
             padding: 5px 12px; border-radius: 4px; 
             border: 1px solid var(--theme-color); 
             margin-top: 8px; margin-bottom: 0;
             transition: border-color 0.2s, background-color 0.2s;
         }
         
-        /* 2段目：左右に分かれた情報（HUNTER LV と MAIN ESPER） */
+        /* グリッド（LV / ESPER） */
         .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 0; }
         
-        /* 情報パネル：左側の縦線をテーマカラーに連動 */
         .card-item { 
             background: rgba(0, 0, 0, 0.4); padding: 12px 18px; 
             border-left: 4px solid var(--theme-color); border-radius: 0 8px 8px 0; 
@@ -114,23 +141,229 @@
         }
         .card-item-value { font-size: 1.3rem; font-weight: bold; margin-top: 4px; color: #ffffff; }
         
-        /* 3段目：中央スペース（背景のWELCOMEロゴを見せるためにmargin-bottomを自動調整） */
+        /* 中央の余白（ロゴ表示用） */
         .card-grid { margin-bottom: auto; }
         
-        /* 4段目：メッセージパネル */
+        /* メッセージパネル */
         .card-footer { 
             margin: 0 0 15px 0; 
             font-size: 1.05rem; color: #ffffff; background: rgba(0, 0, 0, 0.5); padding: 12px; border-radius: 8px; min-height: 70px; line-height: 1.5; border: 1px solid rgba(255,255,255,0.1); 
         }
 
-        /* 最下段：CITY ACTIVITIES（画像通り白ラインを維持） */
+        /* CITY ACTIVITIES */
         .card-item-full { background: rgba(0, 0, 0, 0.4); padding: 12px 18px; border-left: 4px solid rgba(255, 255, 255, 0.4); border-radius: 0 8px 8px 0; margin: 0; }
-        .card-item-full .card-item-value { font-size: 1.1rem; font-weight: normal; }
+        .card-item-full .card-item-value { font-size: 1.1rem; font-weight: normal; margin-top: 4px; color: #ffffff; }
         
-        /* スマホ保存用モーダル */
+        /* スマホ保存用モーダル（念のためインラインでもdisplay:noneを指定） */
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.95); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; padding: 20px;
         }
-        .modal-content { max-width: 100%; max-height: 70%; border: 2px solid var(--theme-color); border-radius: 8px; box-shadow: 0 0 20px rgba(255, 102, 204, 0.5); }
-        .modal-hint { color: var(--theme-color); margin-top: 15px; font-size: 1rem; font-weight: bold; text-align
+        .modal-content { max-width: 100%; max-height: 70%; border: 2px solid var(--theme-color); border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        .modal-hint { color: var(--theme-color); margin-top: 15px; font-size: 1rem; font-weight: bold; text-align: center; animation: pulse 1.5s infinite; }
+        .close-btn { margin-top: 20px; padding: 10px 25px; background: #2a2f3d; color: white; border: 1px solid #3b4252; border-radius: 6px; cursor: pointer; }
+        @keyframes pulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="form-side">
+        <div class="input-group" style="margin-bottom: 15px;">
+            <label style="color: #cbd5e1; font-weight: bold;">Language / 言語 / 语言</label>
+            <select id="langSelect" onchange="changeLanguage()">
+                <option value="ja">日本語</option>
+                <option value="en">English</option>
+                <option value="zh">简体中文</option>
+            </select>
+        </div>
+
+        <div class="input-group" style="margin-bottom: 25px;">
+            <label id="lblColor" style="font-weight: bold; color: var(--theme-color);">テーマカラー（枠線・アクセント色）</label>
+            <input type="color" id="colorSelect" value="#ff66cc" oninput="changeColor()">
+        </div>
+
+        <h2 id="formTitle">Card Input</h2>
+        <div class="input-group"><label id="lblName">プレイヤー名 / エージェントID</label><input type="text" id="inName" value="WoWoW" oninput="updateCard()"></div>
+        <div class="input-group"><label id="lblUid">UID</label><input type="text" id="inUid" value="214284359149" oninput="updateCard()"></div>
+        <div class="input-group"><label id="lblRank">ハンターレベル / 鑑定レベル</label><input type="text" id="inRank" value="Lv.52 / 6" oninput="updateCard()"></div>
+        <div class="input-group"><label id="lblChar">推しキャラ / メイン異能者</label><input type="text" id="inChar" value="ナナリ" oninput="updateCard()"></div>
+        <div class="input-group"><label id="lblMsg">エージェント・メッセージ (改行可)</label><textarea id="inMsg" rows="3" oninput="updateCard()">お気軽にフレンド申請どうぞ！一緒にドライブしましょう。</textarea></div>
+        <div class="input-group"><label id="lblStyle">活動指針 (Play Style)</label><input type="text" id="inStyle" value="環状線タイムアタック" oninput="updateCard()"></div>
+        
+        <button class="save-btn" id="btnGenerate" onclick="generateCardImage()">カード画像を生成する</button>
+    </div>
+    
+    <div class="preview-side">
+        <h2 id="previewTitle">Card Preview</h2>
+        <div class="card-container" id="cardContainer">
+            <div class="card" id="cardPreview">
+                <div class="card-header">
+                    <div class="card-title-group"><div class="card-item-label">AGENT ID</div><div class="card-title" id="outName">WoWoW</div></div>
+                    <div class="card-uid" id="outUidBox">UID: <span id="outUid">214284359149</span></div>
+                </div>
+                
+                <div class="card-grid">
+                    <div class="card-item"><div class="card-item-label">HUNTER LV / APPRAISAL</div><div class="card-item-value" id="outRank">Lv.52 / 6</div></div>
+                    <div class="card-item"><div class="card-item-label">MAIN ESPER</div><div class="card-item-value" id="outChar">ナナリ</div></div>
+                </div>
+                
+                <div class="card-footer" id="outMsg">お気軽にフレンド申請どうぞ！<br>一緒にドライブしましょう。</div>
+                
+                <div class="card-item-full"><div class="card-item-label">CITY ACTIVITIES</div><div class="card-item-value" id="outStyle">環状線タイムアタック</div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="resultModal" style="display: none;">
+    <img src="" alt="Generated Card" class="modal-content" id="modalImage">
+    <div class="modal-hint" id="modalHint">▲ 画像を長押しして保存してください ▲</div>
+    <button class="close-btn" id="modalClose" onclick="closeModal()">閉じて直す</button>
+</div>
+
+<script>
+    const translations = {
+        ja: {
+            formTitle: "カード入力", previewTitle: "カードプレビュー",
+            lblColor: "テーマカラー（枠線・アクセント色）",
+            lblName: "プレイヤー名 / エージェントID", lblUid: "UID",
+            lblRank: "ハンターレベル / 鑑定レベル", lblChar: "推しキャラ / メイン異能者",
+            lblStyle: "活動指針 (Play Style)", lblMsg: "エージェント・メッセージ (改行可)",
+            btnGenerate: "カード画像を生成する", btnGenerating: "生成中...",
+            modalHint: "▲ 画像を長押しして保存してください ▲", modalClose: "閉じて直す"
+        },
+        en: {
+            formTitle: "Card Input", previewTitle: "Card Preview",
+            lblColor: "Theme Color (Border & Accent)",
+            lblName: "Player Name / Agent ID", lblUid: "UID",
+            lblRank: "Hunter Level / Appraisal Lv", lblChar: "Favorite Esper / Main Esper",
+            lblStyle: "Play Style / City Activities", lblMsg: "Agent Message (Line breaks allowed)",
+            btnGenerate: "Generate Card Image", btnGenerating: "Generating...",
+            modalHint: "▲ Long press image to save ▲", modalClose: "Close and Edit"
+        },
+        zh: {
+            formTitle: "名片输入", previewTitle: "名片预览",
+            lblColor: "主题颜色 (边框和点缀)",
+            lblName: "玩家名称 / 鉴定师ID", lblUid: "UID",
+            lblRank: "猎人等级 / 鉴别等级", lblChar: "推荐角色 / 常用伙伴",
+            lblStyle: "活动方针 (Play Style)", lblMsg: "鉴定师留言 (可换行)",
+            btnGenerate: "生成名片图片", btnGenerating: "生成中...",
+            modalHint: "▲ 长按图片保存至相册 ▲", modalClose: "关闭并修改"
+        }
+    };
+
+    // HEXカラーを安全にRGBAに変換（エラー対策済）
+    function hexToRgba(hex, alpha) {
+        try {
+            let r = parseInt(hex.slice(1, 3), 16),
+                g = parseInt(hex.slice(3, 5), 16),
+                b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        } catch(e) { return hex; }
+    }
+
+    function changeColor() {
+        try {
+            const color = document.getElementById('colorSelect').value;
+            document.documentElement.style.setProperty('--theme-color', color);
+            const rgbaColor = hexToRgba(color, 0.3);
+            document.getElementById('outUidBox').style.backgroundColor = rgbaColor;
+        } catch(e) { console.error(e); }
+    }
+
+    function changeLanguage() {
+        try {
+            const lang = document.getElementById('langSelect').value;
+            const t = translations[lang];
+            
+            document.getElementById('formTitle').innerText = t.formTitle;
+            document.getElementById('previewTitle').innerText = t.previewTitle;
+            document.getElementById('lblColor').innerText = t.lblColor;
+            document.getElementById('lblName').innerText = t.lblName;
+            document.getElementById('lblUid').innerText = t.lblUid;
+            document.getElementById('lblRank').innerText = t.lblRank;
+            document.getElementById('lblChar').innerText = t.lblChar;
+            document.getElementById('lblStyle').innerText = t.lblStyle;
+            document.getElementById('lblMsg').innerText = t.lblMsg;
+            document.getElementById('btnGenerate').innerText = t.btnGenerate;
+            document.getElementById('modalHint').innerText = t.modalHint;
+            document.getElementById('modalClose').innerText = t.modalClose;
+        } catch(e) { console.error(e); }
+    }
+
+    function updateCard() {
+        try {
+            document.getElementById('outName').innerText = document.getElementById('inName').value || ' ';
+            document.getElementById('outUid').innerText = document.getElementById('inUid').value || ' ';
+            document.getElementById('outRank').innerText = document.getElementById('inRank').value || ' ';
+            document.getElementById('outChar').innerText = document.getElementById('inChar').value || ' ';
+            document.getElementById('outStyle').innerText = document.getElementById('inStyle').value || ' ';
+            document.getElementById('outMsg').innerHTML = document.getElementById('inMsg').value.replace(/\n/g, '<br>') || ' ';
+        } catch(e) { console.error(e); }
+    }
+    
+    function scalePreview() {
+        try {
+            const container = document.getElementById('cardContainer'); 
+            const preview = document.getElementById('cardPreview');
+            if(!container || !preview) return;
+            const containerWidth = container.clientWidth; 
+            const cardWidth = 800;
+            if (containerWidth < cardWidth) {
+                const scale = containerWidth / cardWidth; 
+                preview.style.transform = `scale(${scale})`;
+                preview.style.transformOrigin = 'top left'; 
+                container.style.height = `${450 * scale + 20}px`;
+            } else { 
+                preview.style.transform = 'none'; 
+                container.style.height = 'auto'; 
+            }
+        } catch(e) { console.error(e); }
+    }
+    
+    function generateCardImage() {
+        try {
+            const card = document.getElementById('cardPreview'); 
+            const btn = document.getElementById('btnGenerate');
+            const lang = document.getElementById('langSelect').value;
+            
+            btn.innerText = translations[lang].btnGenerating; 
+            btn.disabled = true;
+            
+            const originalTransform = card.style.transform; 
+            const originalTransformOrigin = card.style.transformOrigin;
+            card.style.transform = 'none'; 
+            card.style.transformOrigin = 'initial';
+            
+            html2canvas(card, { scale: 2, backgroundColor: null, useCORS: true, logging: false, width: 800, height: 450 }).then(canvas => {
+                card.style.transform = originalTransform; 
+                card.style.transformOrigin = originalTransformOrigin;
+                document.getElementById('modalImage').src = canvas.toDataURL("image/png");
+                document.getElementById('resultModal').style.display = 'flex';
+                btn.innerText = translations[lang].btnGenerate; 
+                btn.disabled = false;
+            }).catch(err => {
+                card.style.transform = originalTransform; 
+                card.style.transformOrigin = originalTransformOrigin;
+                alert("エラー / Error"); 
+                btn.innerText = translations[lang].btnGenerate; 
+                btn.disabled = false;
+            });
+        } catch(e) { 
+            alert("エラーが発生しました。");
+            document.getElementById('btnGenerate').disabled = false;
+        }
+    }
+    
+    function closeModal() { document.getElementById('resultModal').style.display = 'none'; }
+    
+    window.onload = () => { 
+        changeLanguage(); 
+        changeColor(); 
+        updateCard(); 
+        setTimeout(scalePreview, 100); 
+    }; 
+    window.onresize = scalePreview;
+</script>
+</body>
+</html>
