@@ -56,43 +56,16 @@
         /* レイアウト3：メッセージ（最下段） */
         .card-msg { background: rgba(0,0,0,0.6); padding: 15px 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); color: white; font-size: 1.1rem; line-height: 1.5; min-height: 60px; position: relative; }
         
-        /* モーダル（画像保存画面）- 長押し保存を妨げないように改善 */
-        .modal { 
-            display: none; 
-            position: fixed; 
-            top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.95); 
-            z-index: 1000; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            padding: 20px;
-            overflow-y: auto;
-        }
-        
-        /* 画像単体を包むコンテナで重なりを防ぐ */
-        .modal-img-container {
-            width: 100%;
-            max-width: 600px;
-            display: flex;
-            justify-content: center;
-            margin-bottom: 15px;
-            position: relative;
-        }
-        
-        .modal img { 
-            max-width: 100%; 
-            height: auto; 
-            border: 2px solid var(--theme-color); 
-            border-radius: 8px;
-            display: block;
-            pointer-events: auto !important; /* 長押しを絶対に許可 */
-            -webkit-touch-callout: default !important; /* iOSでの長押しメニューを強制有効 */
-            user-select: auto !important;
-        }
-        
+        /* モーダル（画像保存画面） */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
+        .modal-img-container { width: 100%; max-width: 600px; display: flex; justify-content: center; margin-bottom: 15px; position: relative; }
+        .modal img { max-width: 100%; height: auto; border: 2px solid var(--theme-color); border-radius: 8px; display: block; pointer-events: auto; }
         .modal p { color: var(--theme-color); font-weight: bold; margin: 10px 0; font-size: 1.1rem; text-align: center; }
-        .modal button { padding: 12px 40px; background: #2a2f3d; color: white; border: 1px solid #3b4252; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1rem; }
+        
+        /* モーダルのボタンエリア */
+        .modal-actions { display: flex; gap: 15px; margin-top: 10px; }
+        .dl-btn { padding: 12px 25px; background: var(--theme-color); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1rem; }
+        .close-btn { padding: 12px 25px; background: #2a2f3d; color: white; border: 1px solid #3b4252; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1rem; }
     </style>
 </head>
 <body>
@@ -157,15 +130,18 @@
         <div class="modal-img-container">
             <img id="modalImg" src="" alt="Generated Card">
         </div>
-        <p id="t_hint">▲ 画像を長押しして保存してください ▲</p>
-        <button onclick="document.getElementById('modal').style.display='none'" id="t_close">閉じて直す</button>
+        <p id="t_hint">▲ 画像を長押し、または下のボタンで保存 ▲</p>
+        <div class="modal-actions">
+            <button onclick="downloadImage()" class="dl-btn" id="t_dl">画像を保存する</button>
+            <button onclick="document.getElementById('modal').style.display='none'" class="close-btn" id="t_close">閉じて直す</button>
+        </div>
     </div>
 
     <script>
         const dict = {
-            ja: { form:"カード入力", lang:"言語 / Language", color:"テーマカラー（枠線・アクセント色）", name:"プレイヤー名 / エージェントID", uid:"UID", rank:"ハンターレベル / 鑑定レベル", char:"推しキャラ / メインアライ", msg:"エージェント・メッセージ (改行可)", style:"活動指針 (Play Style)", save:"カード画像を生成する", prev:"カードプレビュー", hint:"▲ 画像を長押しして保存してください ▲", close:"閉じて直す" },
-            en: { form:"Card Input", lang:"Language", color:"Theme Color (Border & Accent)", name:"Player Name / Agent ID", uid:"UID", rank:"Hunter Level / Appraisal Lv", char:"Favorite Esper / Main Ally", msg:"Agent Message (Line breaks allowed)", style:"Play Style / City Activities", save:"Generate Card Image", prev:"Card Preview", hint:"▲ Long press image to save ▲", close:"Close and Edit" },
-            zh: { form:"名片输入", lang:"语言", color:"主题颜色 (边框和点缀)", name:"玩家名称 / 鉴定师ID", uid:"UID", rank:"猎人等级 / 鉴别等级", char:"推荐角色 / 常用伙伴", msg:"鉴定师留言 (可换行)", style:"活动方针 (Play Style)", save:"生成名片图片", prev:"名片预览", hint:"▲ 长按图片保存至相册 ▲", close:"关闭并修改" }
+            ja: { form:"カード入力", lang:"言語 / Language", color:"テーマカラー（枠線・アクセント色）", name:"プレイヤー名 / エージェントID", uid:"UID", rank:"ハンターレベル / 鑑定レベル", char:"推しキャラ / メインアライ", msg:"エージェント・メッセージ (改行可)", style:"活動指針 (Play Style)", save:"カード画像を生成する", prev:"カードプレビュー", hint:"▲ 画像を長押し、または下のボタンで保存 ▲", dl:"画像を保存する", close:"閉じて直す" },
+            en: { form:"Card Input", lang:"Language", color:"Theme Color (Border)", name:"Player Name / Agent ID", uid:"UID", rank:"Hunter Level / Appraisal", char:"Favorite Esper / Main Ally", msg:"Agent Message", style:"Play Style / Activities", save:"Generate Image", prev:"Card Preview", hint:"▲ Long press or click button to save ▲", dl:"Save Image", close:"Close & Edit" },
+            zh: { form:"名片输入", lang:"语言", color:"主题颜色 (边框)", name:"玩家名称 / 鉴定师ID", uid:"UID", rank:"猎人等级 / 鉴别等级", char:"推荐角色 / 常用伙伴", msg:"鉴定师留言", style:"活动方针 (Play Style)", save:"生成名片图片", prev:"名片预览", hint:"▲ 长按图片或点击按钮保存 ▲", dl:"保存图片", close:"关闭并修改" }
         };
 
         function updateAll() {
@@ -184,7 +160,7 @@
             } catch(e) {}
 
             const l = document.getElementById('langSelect').value;
-            const keys = ['form','lang','color','name','uid','rank','char','msg','style','save','prev','hint','close'];
+            const keys = ['form','lang','color','name','uid','rank','char','msg','style','save','prev','hint','dl','close'];
             keys.forEach(k => {
                 const el = document.getElementById('t_'+k) || document.getElementById('btnSave');
                 if(el) el.innerText = dict[l][k];
@@ -210,6 +186,7 @@
             }
         }
 
+        // 画像生成処理（Androidバグ対策のBlob変換を実装）
         function saveImage() {
             const p = document.getElementById('cardPreview');
             const btn = document.getElementById('btnSave');
@@ -220,14 +197,36 @@
             
             html2canvas(p, { scale: 2, backgroundColor: null, useCORS: true }).then(canvas => {
                 p.style.transform = origT; p.style.transformOrigin = origO;
-                document.getElementById('modalImg').src = canvas.toDataURL("image/png");
-                document.getElementById('modal').style.display = 'flex';
-                btn.disabled = false; updateAll();
+                
+                // Android Chromeで .bin になるのを防ぐため Blob に変換
+                canvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const img = document.getElementById('modalImg');
+                    img.src = url;
+                    img.dataset.blobUrl = url; // ダウンロードボタン用に保存
+                    
+                    document.getElementById('modal').style.display = 'flex';
+                    btn.disabled = false; updateAll();
+                }, 'image/png');
+                
             }).catch(e => {
                 p.style.transform = origT; p.style.transformOrigin = origO;
                 alert("画像の生成に失敗しました。"); 
                 btn.disabled = false; updateAll();
             });
+        }
+
+        // ダウンロードボタンの処理
+        function downloadImage() {
+            const url = document.getElementById('modalImg').dataset.blobUrl;
+            if(!url) return;
+            const a = document.createElement('a');
+            a.href = url;
+            const uid = document.getElementById('inUid').value || 'agent';
+            a.download = `NTE_Card_${uid}.png`; // NTE_Card_123456789.png という名前で保存
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
 
         window.onload = updateAll;
