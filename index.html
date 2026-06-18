@@ -56,11 +56,43 @@
         /* レイアウト3：メッセージ（最下段） */
         .card-msg { background: rgba(0,0,0,0.6); padding: 15px 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); color: white; font-size: 1.1rem; line-height: 1.5; min-height: 60px; position: relative; }
         
-        /* モーダル（画像保存画面） */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        .modal img { max-width: 100%; max-height: 70%; border: 2px solid var(--theme-color); border-radius: 8px; }
-        .modal p { color: var(--theme-color); font-weight: bold; margin-top: 15px; font-size: 1.1rem; }
-        .modal button { margin-top: 15px; padding: 12px 30px; background: #2a2f3d; color: white; border: 1px solid #3b4252; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        /* モーダル（画像保存画面）- 長押し保存を妨げないように改善 */
+        .modal { 
+            display: none; 
+            position: fixed; 
+            top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.95); 
+            z-index: 1000; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        /* 画像単体を包むコンテナで重なりを防ぐ */
+        .modal-img-container {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .modal img { 
+            max-width: 100%; 
+            height: auto; 
+            border: 2px solid var(--theme-color); 
+            border-radius: 8px;
+            display: block;
+            pointer-events: auto !important; /* 長押しを絶対に許可 */
+            -webkit-touch-callout: default !important; /* iOSでの長押しメニューを強制有効 */
+            user-select: auto !important;
+        }
+        
+        .modal p { color: var(--theme-color); font-weight: bold; margin: 10px 0; font-size: 1.1rem; text-align: center; }
+        .modal button { padding: 12px 40px; background: #2a2f3d; color: white; border: 1px solid #3b4252; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1rem; }
     </style>
 </head>
 <body>
@@ -122,7 +154,9 @@
     </div>
     
     <div class="modal" id="modal">
-        <img id="modalImg" src="">
+        <div class="modal-img-container">
+            <img id="modalImg" src="" alt="Generated Card">
+        </div>
         <p id="t_hint">▲ 画像を長押しして保存してください ▲</p>
         <button onclick="document.getElementById('modal').style.display='none'" id="t_close">閉じて直す</button>
     </div>
@@ -135,7 +169,6 @@
         };
 
         function updateAll() {
-            // テキストの反映
             document.getElementById('outName').innerText = document.getElementById('inName').value || ' ';
             document.getElementById('outUid').innerText = document.getElementById('inUid').value || ' ';
             document.getElementById('outRank').innerText = document.getElementById('inRank').value || ' ';
@@ -143,7 +176,6 @@
             document.getElementById('outStyle').innerText = document.getElementById('inStyle').value || ' ';
             document.getElementById('outMsg').innerHTML = document.getElementById('inMsg').value.replace(/\n/g, '<br>') || ' ';
             
-            // カラーの反映
             const c = document.getElementById('inColor').value;
             document.documentElement.style.setProperty('--theme-color', c);
             try {
@@ -151,7 +183,6 @@
                 document.getElementById('outUidBox').style.backgroundColor = `rgba(${r},${g},${b},0.3)`;
             } catch(e) {}
 
-            // 言語の反映
             const l = document.getElementById('langSelect').value;
             const keys = ['form','lang','color','name','uid','rank','char','msg','style','save','prev','hint','close'];
             keys.forEach(k => {
