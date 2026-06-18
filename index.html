@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NTE 自己紹介カードジェネレーター</title>
+    <title>NTE プロフィールカードジェネレーター</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
@@ -14,89 +14,167 @@
         }
         .container { max-width: 600px; width: 100%; display: flex; flex-direction: column; gap: 20px; }
         .form-side, .preview-side {
-            background: #161920; padding: 20px; border-radius: 12px; border: 1px solid #2a2f3d; width: 100%;
+            background: rgba(22, 25, 32, 0.9); padding: 20px; border-radius: 12px; border: 1px solid #2a2f3d; width: 100%;
         }
         h2 {
-            margin-top: 0; color: #00ffcc; text-transform: uppercase; letter-spacing: 2px; font-size: 1.1rem;
-            border-bottom: 2px solid #00ffcc; padding-bottom: 8px; margin-bottom: 15px;
+            margin-top: 0; color: #ff66cc; text-transform: uppercase; letter-spacing: 2px; font-size: 1.1rem;
+            border-bottom: 2px solid #ff66cc; padding-bottom: 8px; margin-bottom: 15px;
         }
         .input-group { margin-bottom: 12px; }
-        label { display: block; margin-bottom: 4px; font-size: 0.8rem; color: #94a3b8; }
-        input, textarea {
+        label { display: block; margin-bottom: 4px; font-size: 0.8rem; color: #cbd5e1; }
+        input, textarea, select {
             width: 100%; padding: 10px; background: #222733; border: 1px solid #3b4252;
             border-radius: 6px; color: white; font-size: 0.95rem;
         }
-        input:focus, textarea:focus { outline: none; border-color: #00ffcc; box-shadow: 0 0 5px rgba(0, 255, 204, 0.4); }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #ff66cc; box-shadow: 0 0 5px rgba(255, 102, 204, 0.4); }
+        select option { background: #161920; color: white; }
+        
         .save-btn {
-            display: block; width: 100%; padding: 14px; background: linear-gradient(135deg, #00ffcc 0%, #00cccc 100%);
-            color: #0d0f12; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold;
+            display: block; width: 100%; padding: 14px; background: linear-gradient(135deg, #ff66cc 0%, #cc33aa 100%);
+            color: #ffffff; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold;
             cursor: pointer; margin-top: 15px; text-transform: uppercase; letter-spacing: 1px;
         }
         .card-container {
             width: 100%; overflow: hidden; display: flex; justify-content: center; align-items: flex-start;
             background: #090b0e; border-radius: 8px; padding: 10px;
         }
+        
+        /* アップロードされた画像ファイル名を背景に指定 */
         .card {
-            width: 800px; height: 450px; background: linear-gradient(135deg, #11141a 0%, #1a1f2c 100%);
-            border: 4px solid #00ffcc; border-radius: 16px; padding: 35px;
+            width: 800px; height: 450px; 
+            background-image: url('19e93e6dae796-screenshotUrl.jpg');
+            background-size: cover; background-position: center;
+            border: 4px solid #ff66cc; border-radius: 16px; padding: 35px;
             position: relative; display: flex; flex-direction: column; flex-shrink: 0;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(255, 102, 204, 0.2);
         }
-        .card-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid rgba(0, 255, 204, 0.4); padding-bottom: 15px; margin-bottom: 20px; }
-        .card-item-label { font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
-        .card-title { font-size: 2.2rem; font-weight: bold; color: #ffffff; text-shadow: 0 0 10px rgba(255,255,255,0.4); margin: 5px 0 0 0; }
-        .card-uid { font-size: 1.1rem; color: #00ffcc; font-family: monospace; background: rgba(0,0,0,0.3); padding: 5px 12px; border-radius: 4px; }
+        
+        /* 読みやすさを確保する半透明オーバーレイ */
+        .card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(13, 15, 18, 0.7);
+            z-index: 1;
+        }
+        
+        .card-header, .card-grid, .card-footer, .card-item-full {
+            position: relative; z-index: 2;
+        }
+
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid rgba(255, 102, 204, 0.3); padding-bottom: 15px; margin-bottom: 20px; }
+        .card-item-label { font-size: 0.8rem; color: #cbd5e1; text-transform: uppercase; letter-spacing: 1px; }
+        .card-title { font-size: 2.4rem; font-weight: bold; color: #ffffff; text-shadow: 0 0 10px rgba(255,255,255,0.4); margin: 5px 0 0 0; }
+        .card-uid { font-size: 1.1rem; color: #ffffff; font-family: monospace; background: rgba(255, 102, 204, 0.3); padding: 5px 12px; border-radius: 4px; border: 1px solid rgba(255, 102, 204, 0.5); }
         .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-        .card-item { background: rgba(255, 255, 255, 0.04); padding: 12px 18px; border-left: 4px solid #ff007f; border-radius: 0 8px 8px 0; }
+        .card-item { background: rgba(0, 0, 0, 0.4); padding: 12px 18px; border-left: 4px solid #ff66cc; border-radius: 0 8px 8px 0; }
         .card-item-value { font-size: 1.3rem; font-weight: bold; margin-top: 4px; color: #ffffff; }
-        .card-footer { margin-top: auto; font-size: 1.05rem; color: #cbd5e1; background: rgba(0, 0, 0, 0.3); padding: 12px; border-radius: 8px; min-height: 75px; line-height: 1.5; border: 1px solid rgba(255,255,255,0.1); }
+        
+        .card-item-full { background: rgba(0, 0, 0, 0.4); padding: 12px 18px; border-left: 4px solid rgba(255, 255, 255, 0.3); border-radius: 0 8px 8px 0; margin-bottom: 15px; }
+        .card-item-full .card-item-value { font-size: 1.1rem; font-weight: normal; }
+
+        .card-footer { margin-top: auto; font-size: 1.05rem; color: #ffffff; background: rgba(0, 0, 0, 0.5); padding: 12px; border-radius: 8px; min-height: 75px; line-height: 1.5; border: 1px solid rgba(255,255,255,0.1); }
         
         /* スマホ保存用モーダル */
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.9); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; padding: 20px;
+            background: rgba(0, 0, 0, 0.95); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; padding: 20px;
         }
-        .modal-content { max-width: 100%; max-height: 70%; border: 2px solid #00ffcc; border-radius: 8px; box-shadow: 0 0 20px rgba(0, 255, 204, 0.5); }
-        .modal-hint { color: #00ffcc; margin-top: 15px; font-size: 1rem; font-weight: bold; text-align: center; animation: pulse 1.5s infinite; }
+        .modal-content { max-width: 100%; max-height: 70%; border: 2px solid #ff66cc; border-radius: 8px; box-shadow: 0 0 20px rgba(255, 102, 204, 0.5); }
+        .modal-hint { color: #ff66cc; margin-top: 15px; font-size: 1rem; font-weight: bold; text-align: center; animation: pulse 1.5s infinite; }
         .close-btn { margin-top: 20px; padding: 10px 25px; background: #2a2f3d; color: white; border: 1px solid #3b4252; border-radius: 6px; cursor: pointer; }
-        @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+        @keyframes pulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="form-side">
-        <h2>Profile Input</h2>
-        <div class="input-group"><label>プレイヤー名</label><input type="text" id="inName" value="エージェント" oninput="updateCard()"></div>
-        <div class="input-group"><label>UID</label><input type="text" id="inUid" value="000000000" oninput="updateCard()"></div>
-        <div class="input-group"><label>エーテルレベル / ランク</label><input type="text" id="inRank" value="Lv.15" oninput="updateCard()"></div>
-        <div class="input-group"><label>推しキャラ / メインキャラ</label><input type="text" id="inChar" value="ミント" oninput="updateCard()"></div>
-        <div class="input-group"><label>プレイスタイル</label><input type="text" id="inStyle" value="まったり街ぶら・写真撮影・マルチ歓迎" oninput="updateCard()"></div>
-        <div class="input-group"><label>一言メッセージ (改行可)</label><textarea id="inMsg" rows="3" oninput="updateCard()">異能都市でのんびり過ごしています。気軽にフレンド申請どうぞ！</textarea></div>
-        <button class="save-btn" onclick="generateCardImage()">カード画像を生成する</button>
+        <div class="input-group" style="margin-bottom: 20px;">
+            <label style="color: #ff66cc; font-weight: bold;">Language / 言語 / 语言</label>
+            <select id="langSelect" onchange="changeLanguage()">
+                <option value="ja">日本語</option>
+                <option value="en">English</option>
+                <option value="zh">简体中文</option>
+            </select>
+        </div>
+
+        <h2 id="formTitle">Card Input</h2>
+        <div class="input-group"><label id="lblName">プレイヤー名 / エージェントID</label><input type="text" id="inName" value="Hetherell" oninput="updateCard()"></div>
+        <div class="input-group"><label id="lblUid">UID</label><input type="text" id="inUid" value="000000000" oninput="updateCard()"></div>
+        <div class="input-group"><label id="lblRank">ハンターレベル / 鑑定レベル</label><input type="text" id="inRank" value="Lv.45 / 3" oninput="updateCard()"></div>
+        <div class="input-group"><label id="lblChar">推しキャラ / メインアライ</label><input type="text" id="inChar" value="ミント / クレール" oninput="updateCard()"></div>
+        <div class="input-group"><label id="lblStyle">活動指針 (Play Style)</label><input type="text" id="inStyle" value="まったり街ぶら・写真撮影・都市探索" oninput="updateCard()"></div>
+        <div class="input-group"><label id="lblMsg">エージェント・メッセージ (改行可)</label><textarea id="inMsg" rows="3" oninput="updateCard()">異能都市でのんびり過ごしています。気軽にフレンド申請どうぞ！一緒にドライブしましょう。</textarea></div>
+        <button class="save-btn" id="btnGenerate" onclick="generateCardImage()">カード画像を生成する</button>
     </div>
     <div class="preview-side">
-        <h2>Card Preview</h2>
+        <h2 id="previewTitle">Card Preview</h2>
         <div class="card-container" id="cardContainer">
             <div class="card" id="cardPreview">
                 <div class="card-header">
-                    <div class="card-title-group"><div class="card-item-label">PROFILER</div><div class="card-title" id="outName">エージェント</div></div>
+                    <div class="card-title-group"><div class="card-item-label">AGENT ID</div><div class="card-title" id="outName">Hetherell</div></div>
                     <div class="card-uid">UID: <span id="outUid">000000000</span></div>
                 </div>
                 <div class="card-grid">
-                    <div class="card-item"><div class="card-item-label">Level / Rank</div><div class="card-item-value" id="outRank">Lv.15</div></div>
-                    <div class="card-item" style="border-left-color: #00ffcc;"><div class="card-item-label">Favorite Character</div><div class="card-item-value" id="outChar">ミント</div></div>
+                    <div class="card-item"><div class="card-item-label">HUNTER LV / APPRAISAL</div><div class="card-item-value" id="outRank">Lv.45 / 3</div></div>
+                    <div class="card-item"><div class="card-item-label">MAIN ALLY</div><div class="card-item-value" id="outChar">ミント / クレール</div></div>
                 </div>
-                <div class="card-item" style="border-left-color: #3b4252;"><div class="card-item-label">Play Style</div><div class="card-item-value" id="outStyle" style="font-size: 1.15rem;">まったり街ぶら・写真撮影・マルチ歓迎</div></div>
-                <div class="card-footer" id="outMsg">異能都市でのんびり過ごしています。<br>気軽にフレンド申請どうぞ！</div>
+                <div class="card-item-full"><div class="card-item-label">CITY ACTIVITIES</div><div class="card-item-value" id="outStyle">まったり街ぶら・写真撮影・都市探索</div></div>
+                <div class="card-footer" id="outMsg">異能都市でのんびり過ごしています。<br>気軽にフレンド申請どうぞ！一緒にドライブしましょう。</div>
             </div>
         </div>
     </div>
 </div>
 <div class="modal" id="resultModal">
     <img src="" alt="Generated Card" class="modal-content" id="modalImage">
-    <div class="modal-hint">▲ 画像を長押しして保存してください ▲</div>
-    <button class="close-btn" onclick="closeModal()">閉じて直す</button>
+    <div class="modal-hint" id="modalHint">▲ 画像を長押しして保存してください ▲</div>
+    <button class="close-btn" id="modalClose" onclick="closeModal()">閉じて直す</button>
 </div>
 <script>
+    const translations = {
+        ja: {
+            formTitle: "カード入力", previewTitle: "カードプレビュー",
+            lblName: "プレイヤー名 / エージェントID", lblUid: "UID",
+            lblRank: "ハンターレベル / 鑑定レベル", lblChar: "推しキャラ / メインアライ",
+            lblStyle: "活動指針 (Play Style)", lblMsg: "エージェント・メッセージ (改行可)",
+            btnGenerate: "カード画像を生成する", btnGenerating: "生成中...",
+            modalHint: "▲ 画像を長押しして保存してください ▲", modalClose: "閉じて直す"
+        },
+        en: {
+            formTitle: "Card Input", previewTitle: "Card Preview",
+            lblName: "Player Name / Agent ID", lblUid: "UID",
+            lblRank: "Hunter Level / Appraisal Lv", lblChar: "Favorite Character / Main Ally",
+            lblStyle: "Play Style / City Activities", lblMsg: "Agent Message (Line breaks allowed)",
+            btnGenerate: "Generate Card Image", btnGenerating: "Generating...",
+            modalHint: "▲ Long press image to save ▲", modalClose: "Close and Edit"
+        },
+        zh: {
+            formTitle: "名片输入", previewTitle: "名片预览",
+            lblName: "玩家名称 / 鉴定师ID", lblUid: "UID",
+            lblRank: "猎人等级 / 鉴别等级", lblChar: "推荐角色 / 常用伙伴",
+            lblStyle: "活动方针 (Play Style)", lblMsg: "鉴定师留言 (可换行)",
+            btnGenerate: "生成名片图片", btnGenerating: "生成中...",
+            modalHint: "▲ 长按图片保存至相册 ▲", modalClose: "关闭并修改"
+        }
+    };
+
+    function changeLanguage() {
+        const lang = document.getElementById('langSelect').value;
+        const t = translations[lang];
+        
+        document.getElementById('formTitle').innerText = t.formTitle;
+        document.getElementById('previewTitle').innerText = t.previewTitle;
+        document.getElementById('lblName').innerText = t.lblName;
+        document.getElementById('lblUid').innerText = t.lblUid;
+        document.getElementById('lblRank').innerText = t.lblRank;
+        document.getElementById('lblChar').innerText = t.lblChar;
+        document.getElementById('lblStyle').innerText = t.lblStyle;
+        document.getElementById('lblMsg').innerText = t.lblMsg;
+        document.getElementById('btnGenerate').innerText = t.btnGenerate;
+        document.getElementById('modalHint').innerText = t.modalHint;
+        document.getElementById('modalClose').innerText = t.modalClose;
+    }
+
     function updateCard() {
         document.getElementById('outName').innerText = document.getElementById('inName').value || ' ';
         document.getElementById('outUid').innerText = document.getElementById('inUid').value || ' ';
@@ -105,6 +183,7 @@
         document.getElementById('outStyle').innerText = document.getElementById('inStyle').value || ' ';
         document.getElementById('outMsg').innerHTML = document.getElementById('inMsg').value.replace(/\n/g, '<br>') || ' ';
     }
+    
     function scalePreview() {
         const container = document.getElementById('cardContainer'); const preview = document.getElementById('cardPreview');
         const containerWidth = container.clientWidth; const cardWidth = 800;
@@ -113,23 +192,28 @@
             preview.style.transformOrigin = 'top left'; container.style.height = `${450 * scale + 20}px`;
         } else { preview.style.transform = 'none'; container.style.height = 'auto'; }
     }
+    
     function generateCardImage() {
         const card = document.getElementById('cardPreview'); const btn = document.querySelector('.save-btn');
-        btn.innerText = "生成中..."; btn.disabled = true;
+        const lang = document.getElementById('langSelect').value;
+        btn.innerText = translations[lang].btnGenerating; btn.disabled = true;
+        
         const originalTransform = card.style.transform; const originalTransformOrigin = card.style.transformOrigin;
         card.style.transform = 'none'; card.style.transformOrigin = 'initial';
+        
         html2canvas(card, { scale: 2, backgroundColor: null, useCORS: true, logging: false, width: 800, height: 450 }).then(canvas => {
             card.style.transform = originalTransform; card.style.transformOrigin = originalTransformOrigin;
             document.getElementById('modalImage').src = canvas.toDataURL("image/png");
             document.getElementById('resultModal').style.display = 'flex';
-            btn.innerText = "カード画像を生成する"; btn.disabled = false;
+            btn.innerText = translations[lang].btnGenerate; btn.disabled = false;
         }).catch(err => {
             card.style.transform = originalTransform; card.style.transformOrigin = originalTransformOrigin;
-            alert("画像の生成に失敗しました。"); btn.innerText = "カード画像を生成する"; btn.disabled = false;
+            alert("Error"); btn.innerText = translations[lang].btnGenerate; btn.disabled = false;
         });
     }
+    
     function closeModal() { document.getElementById('resultModal').style.display = 'none'; }
-    window.onload = () => { updateCard(); scalePreview(); }; window.onresize = scalePreview;
+    window.onload = () => { changeLanguage(); updateCard(); scalePreview(); }; window.onresize = scalePreview;
 </script>
 </body>
 </html>
